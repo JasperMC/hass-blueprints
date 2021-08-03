@@ -7,7 +7,9 @@ blueprint:
     control_mode:
       name: Control Mode
       description: An input select with control modes "Linked to a light", "Humidity" and "Disabled"
-
+      selector:
+        entity:
+          domain: input_select
     control_light:
       name: Light
       description: The light that controls the fan. Only applicable with "Linked to light"
