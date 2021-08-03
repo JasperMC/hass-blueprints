@@ -1,0 +1,115 @@
+blueprint:
+  name: Fan Control (Light, Humidity)
+  description: Controls a fan based on a light or humidity
+  domain: automation
+
+  input:
+    control_mode:
+      name: Control Mode
+      description: An input select with control modes "Linked to a light", "Humidity" and "Disabled"
+
+    control_light:
+      name: Light
+      description: The light that controls the fan. Only applicable with "Linked to light"
+      selector:
+        entity:
+          domain: light
+
+    control_humidity_sensor:
+      name: Humidity Sensor
+      description: Humidity sensor
+      selector:
+        entity:
+          domain: sensor
+
+    reference_humidity:
+      name: Reference Humidity
+      description: Humidity reference.
+      default: 60
+
+    control_fan:
+      name: Fan
+      description: The fan to control
+      selector:
+        entity:
+          domain: fan
+
+trigger:
+  - platform: state
+    entity_id: !input control_light
+    id: trigger_light_off
+    to: on
+  - platform: numeric_state
+    entity_id: !input control_humidity_sensor
+    id: trigger_humidity_high
+    above: !input reference_humidity
+  - platform: state
+    entity_id: !input control_light
+    id: trigger_light_off
+    from: 'on'
+    to: unavailable
+  - platform: numeric_state
+    entity_id: !input control_humidity_sensor
+    id: trigger_humidity_normal
+    below: !input reference_humidity
+  condition:
+  - condition: not
+    conditions:
+    - condition: state
+      entity_id: !input control_mode
+      state: 'False'
+  action:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: trigger_light_on
+      - condition: state
+        entity_id: !input control_mode
+        state: Linked to light
+      sequence:
+      - service: fan.turn_on
+        target:
+          entity_id: !input control_fan
+    - conditions:
+      - condition: trigger
+        id: trigger_humidity_high
+      - condition: state
+        entity_id: !input control_mode
+        state: Humidity
+      sequence:
+      - service: fan.turn_on
+        target:
+          entity_id: !input control_fan
+    - conditions:
+      - condition: trigger
+        id: trigger_light_off
+      - condition: state
+        entity_id: !input control_mode
+        state: Linked to light
+      - condition: state
+        entity_id: !input control_fan
+        state: 'on'
+      sequence:
+      - service: fan.turn_off
+        target:
+          entity_id: !input control_fan
+    - conditions:
+      - condition: trigger
+        id: trigger_humidity_normal
+      - condition: state
+        entity_id: !input control_fan
+        state: Humidity
+      - condition: state
+        entity_id: !input control_fan
+        state: 'on'
+      sequence:
+      - service: fan.turn_off
+        target:
+          entity_id: !input control_fan
+
+variables:
+  control_light: !input control_light
+  control_humidity_sensor: !input control_humidity_sensor
+  control_mode: !input control_mode
+  control_fan: !input control_fan
+  reference_humidity: !input reference_humidity
