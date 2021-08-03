@@ -52,13 +52,13 @@ trigger:
     entity_id: !input control_humidity_sensor
     id: trigger_humidity_normal
     below: !input reference_humidity
-  condition:
+condition:
   - condition: not
     conditions:
     - condition: state
       entity_id: !input control_mode
       state: 'False'
-  action:
+action:
   - choose:
     - conditions:
       - condition: trigger
