@@ -55,17 +55,18 @@ blueprint:
 
 variables:
   geofence_occupants: []
+  geofence_enabled: !input geofence_enabled
 
 
 trigger:
   - platform: template
     value_template: |
-      {{ geofence_occupants }}
+      {{ states.person|selectattr('state','equalto', !input geofence_zone)|list|length }}
     id: zone_occupants_change
 
 condition:
   - condition: template
-    value_template: {{ !input geofence_enabled }}
+    value_template: {{ geofence_enabled }}
 
 actions:
 
