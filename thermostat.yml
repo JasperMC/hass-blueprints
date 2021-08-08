@@ -10,7 +10,7 @@ blueprint:
         selector:
           entity:
               domain: climate
-     temperature_sensor:
+      temperature_sensor:
        name: Temperature Sensor
        description: An optional external temperature sensor to use.
        selector:
@@ -18,71 +18,71 @@ blueprint:
            domain: sensor
            device_class: temperature
 
-     geofence_enabled:
+      geofence_enabled:
        name: Enable Geofence
        description: Whether to enable or disable geofencing.
        default: false
        selector:
          boolean:
-     daynight_enabled:
+      daynight_enabled:
        name: Enable Day/Night time
        description: Whether to enable or disable day/night time control.
        default: false
        selector:
          boolean:
 
-     geofence_zone:
+      geofence_zone:
        name: Geofence Zone
        description: The zone to use for geofencing.
        selector:
          entity:
            domain: zone
 
-    daytime_start:
+      daytime_start:
       name: Daytime
       description: The time at which you consider it to be daytime.
       default: '07:30:00'
       selector:
         time:
 
-    daytime_temperature:
-      name: Daytime temperature
-      description: Target temperature at daytime.
-      default: 20
-      selector:
-        number:
-          min: 15
-          max: 30
-          step: 1
-          mode: slider
+      daytime_temperature:
+        name: Daytime temperature
+        description: Target temperature at daytime.
+        default: 20
+        selector:
+          number:
+            min: 15
+            max: 30
+            step: 1
+            mode: slider
 
-  nighttime_start:
-      name: Daytime
-      description: The time at which you consider it to be nighttime.
-      default: '21:30:00'
-      selector:
-        time:
+      nighttime_start:
+        name: Daytime
+        description: The time at which you consider it to be nighttime.
+        default: '21:30:00'
+        selector:
+          time:
 
-    nighttime_temperature:
-      name: Nighttime temperature
-      description: Target temperature at nighttime.
-      default: 20
-      selector:
-        number:
-          min: 15
-          max: 30
-          step: 1
-          mode: slider
-    away_temperature:
-      name: Away temperature
-      description: Target temperature when away.
-      default: 20
-      selector:
-        number:
-          min: 15
-          max: 30
-          step: 1
-          mode: slider
+      nighttime_temperature:
+        name: Nighttime temperature
+        description: Target temperature at nighttime.
+        default: 20
+        selector:
+          number:
+            min: 15
+            max: 30
+            step: 1
+            mode: slider
+      away_temperature:
+        name: Away temperature
+        description: Target temperature when away.
+        default: 20
+        selector:
+          number:
+            min: 15
+            max: 30
+            step: 1
+            mode: slider
 
 variables:
   geofence_enabled: !input geofence_enabled
@@ -98,6 +98,7 @@ variables:
   is_daytime: |
     {% if !input daytime_start < states('sensor.time') < !input daytime_night %}
       true
+
     {% else %}
       false
     {% endif %}
