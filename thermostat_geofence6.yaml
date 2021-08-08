@@ -74,8 +74,8 @@ actions:
     entity_id: {{ !input thermostat }}
     data:
       temperature: |
-      {% if states.person|selectattr('state','equalto', !input geofence_zone)|list|length > 0 %}
-        {{ !input present_temperature }}
-      {% else %}
-        {{ !input away_temperature }}
-      {% endif %}
+        {% if states.person|selectattr('state','equalto', !input geofence_zone)|list|length > 0 %}
+          {{ !input present_temperature }}
+        {% else %}
+          {{ !input away_temperature }}
+        {% endif %}
