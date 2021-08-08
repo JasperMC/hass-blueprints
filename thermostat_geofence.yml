@@ -54,8 +54,7 @@ blueprint:
             mode: slider
 
 variables:
-  geofence_occupants: {{ states.person|selectattr('state','equalto', !input geofence_zone)|list }}
-  geofence_occupants_count: {{ states.person|selectattr('state','equalto', !input geofence_zone)|list|length }}
+  geofence_occupants: []
 
 
 trigger:
@@ -76,8 +75,8 @@ actions:
       {{ thermostat }}
     data:
     temperature: |
-      {% if geofence_occupants_count > 0 %}                
-        {{ !input present_temperature }}        
+      {% if states.person|selectattr('state','equalto', !input geofence_zone)|list|length > 0 %}
+        {{ !input present_temperature }}
       {% else %}
         {{ !input away_temperature }}
       {% endif %}
