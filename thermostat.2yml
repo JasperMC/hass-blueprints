@@ -87,7 +87,7 @@ blueprint:
 variables:
   geofence_enabled: !input geofence_enabled
   geofence_zone: !input geofence_zone
-  geofence_occupants: {{ states.person|selectattr('state','equalto', geofence_zone)|list }}
+  geofence_occupants: {{ states.person|selectattr('state','equalto', !input geofence_zone)|list }}
   geofence_occupants_count: {{ states.person|selectattr('state','equalto', !input geofence_zone)|list|length }}
 
   daynight_enabled: !input daynight_enabled
