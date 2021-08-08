@@ -1,0 +1,83 @@
+blueprint:
+    name: Thermostat Geofence
+    description: Thermostat control based on geofence
+    domain: automation
+
+    input:
+      thermostat:
+        name: Thermostat
+        description: The thermostat you'd like to control.
+        selector:
+          entity:
+              domain: climate
+      temperature_sensor:
+       name: Temperature Sensor
+       description: An optional external temperature sensor to use.
+       selector:
+         entity:
+           domain: sensor
+           device_class: temperature
+
+      geofence_enabled:
+       name: Enable Geofence
+       description: Whether to enable or disable geofencing.
+       default: false
+       selector:
+         boolean:
+
+      geofence_zone:
+       name: Geofence Zone
+       description: The zone to use for geofencing.
+       selector:
+         entity:
+           domain: zone
+
+      present_temperature:
+        name: Present temperature
+        description: Target temperature when present.
+        default: 20
+        selector:
+          number:
+            min: 15
+            max: 30
+            step: 1
+            mode: slider
+      away_temperature:
+        name: Away temperature
+        description: Target temperature when away.
+        default: 20
+        selector:
+          number:
+            min: 15
+            max: 30
+            step: 1
+            mode: slider
+
+variables:
+  geofence_occupants: {{ states.person|selectattr('state','equalto', !input geofence_zone)|list }}
+  geofence_occupants_count: {{ states.person|selectattr('state','equalto', !input geofence_zone)|list|length }}
+
+
+trigger:
+  - platform: template
+    value_template: |
+      {{ geofence_occupants }}
+    id: zone_occupants_change
+
+condition:
+  - condition: template
+    value_template: {{ !input geofence_enabled }}
+
+actions:
+
+  - service: climate.set_temperature
+    target:
+    entity_id: |
+      {{ thermostat }}
+    data:
+    temperature: |
+      {% if geofence_occupants_count > 0 %}                
+        {{ !input present_temperature }}        
+      {% else %}
+        {{ !input away_temperature }}
+      {% endif %}
