@@ -1,0 +1,166 @@
+blueprint:
+    name: Smart Thermostat
+    description: Thermostat control based on time and geofence.
+    domain: automation
+
+    input:
+      thermostat:
+        name: Thermostat
+        description: The thermostat you'd like to control.
+        selector:
+          entity:
+              domain: climate
+     temperature_sensor:
+       name: Temperature Sensor
+       description: An optional external temperature sensor to use.
+       selector:
+         entity:
+           domain: sensor
+           device_class: temperature
+
+     geofence_enabled:
+       name: Enable Geofence
+       description: Whether to enable or disable geofencing.
+       default: false
+       selector:
+         boolean:
+     daynight_enabled:
+       name: Enable Day/Night time
+       description: Whether to enable or disable day/night time control.
+       default: false
+       selector:
+         boolean:
+
+     geofence_zone:
+       name: Geofence Zone
+       description: The zone to use for geofencing.
+       selector:
+         entity:
+           domain: zone
+
+    daytime_start:
+      name: Daytime
+      description: The time at which you consider it to be daytime.
+      default: '07:30:00'
+      selector:
+        time:
+
+    daytime_temperature:
+      name: Daytime temperature
+      description: Target temperature at daytime.
+      default: 20
+      selector:
+        number:
+          min: 15
+          max: 30
+          step: 1
+          mode: slider
+
+  nighttime_start:
+      name: Daytime
+      description: The time at which you consider it to be nighttime.
+      default: '21:30:00'
+      selector:
+        time:
+
+    nighttime_temperature:
+      name: Nighttime temperature
+      description: Target temperature at nighttime.
+      default: 20
+      selector:
+        number:
+          min: 15
+          max: 30
+          step: 1
+          mode: slider
+    away_temperature:
+      name: Away temperature
+      description: Target temperature when away.
+      default: 20
+      selector:
+        number:
+          min: 15
+          max: 30
+          step: 1
+          mode: slider
+
+variables:
+  geofence_enabled: !input geofence_enabled
+  geofence_zone: !input geofence_zone
+  geofence_occupants: {{ states.person|selectattr('state','equalto', geofence_zone)|list }}
+  geofence_occupants_count: {{ states.person|selectattr('state','equalto', !input geofence_zone)|list|length }}
+
+  daynight_enabled: !input daynight_enabled
+  daytime_start: !input daytime_start
+  daytime_temperature: !input daytime_temperature
+  nighttime_start: !input nighttime_start
+  nighttime_temperature: !input nighttime_temperature
+  is_daytime: |
+    {% if !input daytime_start < states('sensor.time') < !input daytime_night %}
+      true
+    {% else %}
+      false
+    {% endif %}
+
+trigger:
+  - platform: time
+    id: daytime_start
+    at: |
+      {{ daytime_start }}
+  - platform: time
+    id: nighttime_start
+    at: |
+      {{ nighttime_start }}
+  - platform: template
+    value_template: |
+      {{ geofence_occupants }}
+    id: zone_occupants_change
+
+condition:
+  - condition: template
+    value_template: {{ daynight_enabled or geofence_enabled }}
+
+actions:
+  choose:
+  - conditions:
+      - condition: template
+        value_template: '{{ geofence_enabled }}'
+    sequence:
+      - choose:
+          - conditions:
+              - condition: trigger
+                id: zone_occupants_change
+            sequence:
+              - service: climate.set_temperature
+                target:
+                  entity_id: |
+                    {{ thermostat }}
+                data:
+                  temperature: |
+                    {% if geofence_occupants_count > 0 %}
+                      {% if is_daytime %}
+                        {{ daytime_temperature }}
+                      {% else %}
+                        {{ nighttime_temperature }}
+                      {% endif %}
+                    {% else %}
+                      {{ away_temperature }}
+                    {% endif %}
+        default: []
+  - conditions:
+      - condition: template
+        value_template: '{{ daynight_enabled }}'
+        sequence:
+          - service: climate.set_temperature
+            target:
+              entity_id: |
+                {{ thermostat }}
+            data:
+              temperature: |
+                {% if is_daytime %}
+                  {{ daytime_temperature }}
+                {% else %}
+                  {{ nighttime_temperature }}
+                {% endif %}
+
+default: []
