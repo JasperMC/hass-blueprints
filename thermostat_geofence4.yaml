@@ -69,7 +69,6 @@ condition:
     value_template: '{{ geofence_enabled }}'
 
 actions:
-
   - service: climate.set_temperature
     target:
     entity_id: |
