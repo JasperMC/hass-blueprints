@@ -68,13 +68,12 @@ condition:
   - condition: template
     value_template: '{{ geofence_enabled }}'
 
-action:
+actions:
   - service: climate.set_temperature
     target:
-    entity_id: |
-      {{ thermostat }}
+    entity_id: {{ !input thermostat }}
     data:
-    temperature: |
+      temperature: |
       {% if states.person|selectattr('state','equalto', !input geofence_zone)|list|length > 0 %}
         {{ !input present_temperature }}
       {% else %}
