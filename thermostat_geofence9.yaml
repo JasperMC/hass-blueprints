@@ -71,8 +71,8 @@ condition:
 action:
   - service: climate.set_temperature
     target:
-    entity_id: |
-      {{ !input thermostat }}
+      entity_id: |
+        {{ !input thermostat }}
     data:
       temperature: |
         {% if states.person|selectattr('state','equalto', !input geofence_zone)|list|length > 0 %}
