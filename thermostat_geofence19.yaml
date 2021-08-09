@@ -65,7 +65,7 @@ variables:
 
 trigger:
   - platform: template
-    value_template: "{{ states.person|selectattr('state','equalto', geofence_zone | replace('zone.', '') )|list|length }}"
+    value_template: "{{ states.person|selectattr('state','equalto', ( geofence_zone | replace('zone.', '')) )|list|length }}"
     id: zone_occupants_change
 
 condition:
@@ -79,7 +79,7 @@ action:
         {{ thermostat }}
     data:
       temperature: |
-        {% if states.person|selectattr('state','equalto', geofence_zone)|list|length > 0 %}
+        {% if states.person|selectattr('state','equalto', ( geofence_zone | replace('zone.', '')) )|list|length > 0 %}
           {{ present_temperature }}
         {% else %}
           {{ away_temperature }}
