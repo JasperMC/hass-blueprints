@@ -54,8 +54,10 @@ blueprint:
             mode: slider
 
 variables:
+  thermostat: !input thermostat
   geofence_enabled: !input geofence_enabled
   geofence_zone: !input geofence_zone
+  
 
 
 trigger:
@@ -71,7 +73,7 @@ action:
   - service: climate.set_temperature
     target:
       entity_id: |
-        {{ !input thermostat }}
+        {{ thermostat }}
     data:
       temperature: |
         {% if states.person|selectattr('state','equalto', geofence_zone)|list|length > 0 %}
