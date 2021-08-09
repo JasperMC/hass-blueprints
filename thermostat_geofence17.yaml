@@ -56,7 +56,7 @@ blueprint:
 variables:
   thermostat: !input thermostat
   geofence_enabled: !input geofence_enabled
-  geofence_zone: !input geofence_zone
+  geofence_zone: !input geofence_zone | replace('zone.', '')
   
   present_temperature: !input present_temperature
   away_temperature: !input away_temperature
