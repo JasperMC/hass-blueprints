@@ -60,7 +60,7 @@ variables:
 
 trigger:
   - platform: template
-    value_template: {{ states.person|selectattr('state','equalto', !input geofence_zone)|list|length }}
+    value_template: "{{ states.person|selectattr('state','equalto', !input geofence_zone)|list|length }}"
     id: zone_occupants_change
 
 condition:
