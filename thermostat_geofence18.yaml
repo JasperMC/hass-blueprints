@@ -56,7 +56,7 @@ blueprint:
 variables:
   thermostat: !input thermostat
   geofence_enabled: !input geofence_enabled
-  geofence_zone: !input geofence_zone | replace('zone.', '')
+  geofence_zone: !input geofence_zone
   
   present_temperature: !input present_temperature
   away_temperature: !input away_temperature
@@ -65,7 +65,7 @@ variables:
 
 trigger:
   - platform: template
-    value_template: "{{ states.person|selectattr('state','equalto', geofence_zone)|list|length }}"
+    value_template: "{{ states.person|selectattr('state','equalto', geofence_zone | replace('zone.', '') )|list|length }}"
     id: zone_occupants_change
 
 condition:
