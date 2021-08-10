@@ -140,16 +140,16 @@ action:
         {{ thermostat }}
     data:
       temperature: |
-        {% if states.person|selectattr('state','equalto', ( geofence_zone | replace('zone.', '')) )|list|length > 0 %}
-          {% if day_night_cycle_enabled %}
-            {% if trigger.id == "daytime" %}
-              {{ daytime_temperature }}
-            {% else %}
-              {{ nighttime_temperature }}
+        {% if states.person|selectattr('state','equalto', ( geofence_zone | replace('zone.', '')) )|list|length > 0 %} # If someone is home
+          {% if day_night_cycle_enabled %} # and day/night is enabled
+            {% if trigger.id == "daytime" %} # If it's become daytime
+              {{ daytime_temperature }} # Set the temperature to daytime
+            {% else %} # If not..
+              {{ nighttime_temperature }} # Set the themperature to nighttime
             {% endif %}
-          {% else %}
-            {{ present_temperature }}
+          {% else %} # If day/night cycle is not enabled
+            {{ present_temperature }} # Set the temperature to present temperature.
           {% endif %}}
-        {% else %}
-          {{ away_temperature }}
+        {% else %} # If nobody's home
+          {{ away_temperature }} # Set the temperature to away temperature
         {% endif %}
