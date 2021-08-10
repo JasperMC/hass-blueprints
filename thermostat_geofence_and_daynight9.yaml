@@ -11,26 +11,26 @@ blueprint:
           entity:
               domain: climate
       temperature_sensor:
-       name: Temperature Sensor
-       description: An optional external temperature sensor to use.
-       selector:
-         entity:
-           domain: sensor
-           device_class: temperature
+        name: Temperature Sensor
+        description: An optional external temperature sensor to use.
+        selector:
+          entity:
+            domain: sensor
+            device_class: temperature
 
       geofence_enabled:
-       name: Enable Geofence
-       description: Whether to enable or disable geofencing.
-       default: false
-       selector:
-         boolean:
+        name: Enable Geofence
+        description: Whether to enable or disable geofencing.
+        default: false
+        selector:
+          boolean:
 
       geofence_zone:
-       name: Geofence Zone
-       description: The zone to use for geofencing.
-       selector:
-         entity:
-           domain: zone
+        name: Geofence Zone
+        description: The zone to use for geofencing.
+        selector:
+          entity:
+            domain: zone
 
       present_temperature:
         name: Present temperature
@@ -117,7 +117,10 @@ variables:
 
 trigger:
   - platform: template
-    value_template: "{{ states.person|selectattr('state','equalto', ( geofence_zone | replace('zone.', '')) )|list|length }}"
+    value_template: |
+      {% set zone_name = ( geofence_zone | replace('zone.', '')) %}
+      {% set zone_occupants = states.person|selectattr('state','equalto', zone_name )|list|length %}
+      {{ zone_occupants }}"
     id: zone_occupants_change
   - platform: time
     at: !input daytime
@@ -137,7 +140,7 @@ action:
       entity_id: !input thermostat
     data:
       temperature: |
-        {% if states.person|selectattr('state','equalto', ( geofence_zone | replace('zone.', '')) )|list|length > 0 %}
+        {% if zone_occupants > 0 %}
           {% if day_night_cycle_enabled %}
             {% if trigger.id == "daytime" %}
               {{ daytime_temperature }}
