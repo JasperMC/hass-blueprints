@@ -80,7 +80,7 @@ blueprint:
             mode: slider
 
       nighttime:
-        name: Nightime
+        name: Nighttime
         description: The time at which you consider it to be nighttime.
         default: '21:30:00'
         selector:
