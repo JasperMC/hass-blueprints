@@ -1,5 +1,5 @@
 blueprint:
-    name: Thermostat Geofence and Day/Night Cycle
+    name: Thermostat Geofence
     description: Thermostat control based on geofence
     domain: automation
 
@@ -87,8 +87,8 @@ blueprint:
           time:
 
       nighttime_temperature:
-        name: Nighttime temperature
-        description: Target temperature at nighttime.
+        name: Night time temperature
+        description: Target temperature at night time.
         default: 20
         selector:
           number:
@@ -121,12 +121,10 @@ trigger:
     id: zone_occupants_change
   - platform: time
     id: daytime
-    at: |
-      {{ daytime }}
+    at: '{{ daytime }}'
   - platform: time
     id: nighttime
-    at: |
-      {{ nighttime }}
+    at: '{{ nighttime }}'
 
 
 condition:
@@ -140,16 +138,16 @@ action:
         {{ thermostat }}
     data:
       temperature: |
-        {% if states.person|selectattr('state','equalto', ( geofence_zone | replace('zone.', '')) )|list|length > 0 %} # If someone is home
-          {% if day_night_cycle_enabled %} # and day/night is enabled
-            {% if trigger.id == "daytime" %} # If it's become daytime
-              {{ daytime_temperature }} # Set the temperature to daytime
-            {% else %} # If not..
-              {{ nighttime_temperature }} # Set the themperature to nighttime
+        {% if states.person|selectattr('state','equalto', ( geofence_zone | replace('zone.', '')) )|list|length > 0 %}
+          {% if day_night_cycle_enabled %}
+            {% if trigger.id == "daytime" %}
+              {{ daytime_temperature }}
+            {% else %}
+              {{ nighttime_temperature }}
             {% endif %}
-          {% else %} # If day/night cycle is not enabled
-            {{ present_temperature }} # Set the temperature to present temperature.
+          {% else %}
+            {{ present_temperature }}
           {% endif %}}
-        {% else %} # If nobody's home
-          {{ away_temperature }} # Set the temperature to away temperature
+        {% else %}
+          {{ away_temperature }}
         {% endif %}
