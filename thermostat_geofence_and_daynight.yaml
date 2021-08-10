@@ -1,5 +1,5 @@
 blueprint:
-    name: Thermostat Geofence
+    name: Thermostat Geofence and Day/Night Cycle
     description: Thermostat control based on geofence
     domain: automation
 
