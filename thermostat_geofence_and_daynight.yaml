@@ -1,0 +1,155 @@
+blueprint:
+    name: Thermostat Geofence
+    description: Thermostat control based on geofence
+    domain: automation
+
+    input:
+      thermostat:
+        name: Thermostat
+        description: The thermostat you'd like to control.
+        selector:
+          entity:
+              domain: climate
+      temperature_sensor:
+       name: Temperature Sensor
+       description: An optional external temperature sensor to use.
+       selector:
+         entity:
+           domain: sensor
+           device_class: temperature
+
+      geofence_enabled:
+       name: Enable Geofence
+       description: Whether to enable or disable geofencing.
+       default: false
+       selector:
+         boolean:
+
+      geofence_zone:
+       name: Geofence Zone
+       description: The zone to use for geofencing.
+       selector:
+         entity:
+           domain: zone
+
+      present_temperature:
+        name: Present temperature
+        description: Target temperature when present.
+        default: 20
+        selector:
+          number:
+            min: 15
+            max: 30
+            step: 1
+            mode: slider
+
+      away_temperature:
+        name: Away temperature
+        description: Target temperature when away.
+        default: 20
+        selector:
+          number:
+            min: 15
+            max: 30
+            step: 1
+            mode: slider
+
+      day_night_cycle_enabled:
+        name: Enable Day/Night cycle
+        description: Whether to enable or disable day/night cycle control.
+        default: false
+        selector:
+          boolean:
+
+      daytime:
+        name: Daytime
+        description: The time at which you consider it to be daytime.
+        default: '07:30:00'
+        selector:
+          time:
+
+      daytime_temperature:
+        name: Daytime temperature
+        description: Target temperature at daytime.
+        default: 20
+        selector:
+          number:
+            min: 15
+            max: 30
+            step: 1
+            mode: slider
+
+      nighttime:
+        name: Nightime
+        description: The time at which you consider it to be nighttime.
+        default: '21:30:00'
+        selector:
+          time:
+
+      nighttime_temperature:
+        name: Nighttime temperature
+        description: Target temperature at nighttime.
+        default: 20
+        selector:
+          number:
+            min: 15
+            max: 30
+            step: 1
+            mode: slider
+
+
+variables:
+  thermostat: !input thermostat
+  geofence_enabled: !input geofence_enabled
+  geofence_zone: !input geofence_zone
+
+  present_temperature: !input present_temperature
+  away_temperature: !input away_temperature
+
+  day_night_cycle_enabled: !input day_night_cycle_enabled
+  daytime: !input daytime
+  daytime_temperature: !input daytime_temperature
+  nighttime: !input nighttime
+  nighttime_temperature: !input nighttime_temperature
+
+
+
+
+trigger:
+  - platform: template
+    value_template: "{{ states.person|selectattr('state','equalto', ( geofence_zone | replace('zone.', '')) )|list|length }}"
+    id: zone_occupants_change
+  - platform: time
+    id: daytime
+    at: |
+      {{ daytime }}
+  - platform: time
+    id: nighttime
+    at: |
+      {{ nighttime }}
+
+
+condition:
+  - condition: template
+    value_template: '{{ (geofence_enabled or day_night_cycle_enabled) }}'
+
+action:
+  - service: climate.set_temperature
+    target:
+      entity_id: |
+        {{ thermostat }}
+    data:
+      temperature: |
+        {% if states.person|selectattr('state','equalto', ( geofence_zone | replace('zone.', '')) )|list|length > 0 %}
+          {% if day_night_cycle_enabled %}
+            {% if trigger.id == "daytime" %}
+              {{ daytime_temperature }}
+            {% else %}
+              {{ nighttime_temperature }}
+            {% endif %}
+          {% else %}
+            {{ present_temperature }}
+          {% endif %}}
+        {% else %}
+          {{ away_temperature }}
+        {% endif %}
