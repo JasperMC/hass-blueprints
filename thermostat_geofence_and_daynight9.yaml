@@ -141,7 +141,7 @@ action:
           {% if day_night_cycle_enabled %}
             {% if trigger.id == "daytime" %}
               {{ daytime_temperature }}
-            {% elif %}
+            {% elif trigger.id == "nighttime" %}
               {{ nighttime_temperature }}
             {% endif %}
           {% else %}
