@@ -120,12 +120,10 @@ trigger:
     value_template: "{{ states.person|selectattr('state','equalto', ( geofence_zone | replace('zone.', '')) )|list|length }}"
     id: zone_occupants_change
   - platform: time
-    at: |
-      {{ day_time }}
+    at: !input daytime
     id: daytime
   - platform: time
-    at: |
-      {{ night_time }}
+    at: !input nighttime
     id: nighttime
 
 
