@@ -1,6 +1,6 @@
 blueprint:
-    name: Thermostat Geofence
-    description: Thermostat control based on geofence
+    name: Thermostat with Geofence and Day/Night cycle 
+    description: Thermostat control based on geofence, day/night cycle, or both!
     domain: automation
 
     input:
@@ -62,15 +62,15 @@ blueprint:
           boolean:
 
       daytime:
-        name: Daytime
-        description: The time at which you consider it to be daytime.
+        name: Day time
+        description: The time at which you consider it to be day time.
         default: '07:30:00'
         selector:
           time:
 
       daytime_temperature:
-        name: Daytime temperature
-        description: Target temperature at daytime.
+        name: Day time temperature
+        description: Target temperature at day time.
         default: 20
         selector:
           number:
@@ -80,8 +80,8 @@ blueprint:
             mode: slider
 
       nighttime:
-        name: Nighttime
-        description: The time at which you consider it to be nighttime.
+        name: Night time
+        description: The time at which you consider it to be night time.
         default: '21:30:00'
         selector:
           time:
@@ -117,7 +117,7 @@ variables:
 
 trigger:
   - platform: template
-    value_template: "{{ states.person|selectattr('state','equalto', ( geofence_zone | replace('zone.', '')) )|list|length }}"
+    value_template: "{{ states.person|selectattr('state','equalto', ( !input geofence_zone | replace('zone.', '')) )|list|length }}"
     id: zone_occupants_change
   - platform: time
     at: !input daytime
@@ -134,15 +134,14 @@ condition:
 action:
   - service: climate.set_temperature
     target:
-      entity_id: |
-        {{ thermostat }}
+      entity_id: !input thermostat
     data:
       temperature: |
-        {% if states.person|selectattr('state','equalto', ( geofence_zone | replace('zone.', '')) )|list|length > 0 %}
+        {% if states.person|selectattr('state','equalto', ( !input geofence_zone | replace('zone.', '')) )|list|length > 0 %}
           {% if day_night_cycle_enabled %}
             {% if trigger.id == "daytime" %}
               {{ daytime_temperature }}
-            {% else %}
+            {% elif %}
               {{ nighttime_temperature }}
             {% endif %}
           {% else %}
