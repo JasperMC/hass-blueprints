@@ -117,7 +117,7 @@ variables:
 
 trigger:
   - platform: template
-    value_template: "{{ states.person|selectattr('state','equalto', ( !input geofence_zone | replace('zone.', '')) )|list|length }}"
+    value_template: "{{ states.person|selectattr('state','equalto', ( geofence_zone | replace('zone.', '')) )|list|length }}"
     id: zone_occupants_change
   - platform: time
     at: !input daytime
@@ -137,7 +137,7 @@ action:
       entity_id: !input thermostat
     data:
       temperature: |
-        {% if states.person|selectattr('state','equalto', ( !input geofence_zone | replace('zone.', '')) )|list|length > 0 %}
+        {% if states.person|selectattr('state','equalto', ( geofence_zone | replace('zone.', '')) )|list|length > 0 %}
           {% if day_night_cycle_enabled %}
             {% if trigger.id == "daytime" %}
               {{ daytime_temperature }}
