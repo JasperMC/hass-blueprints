@@ -107,9 +107,9 @@ variables:
   away_temperature: !input away_temperature
 
   day_night_cycle_enabled: !input day_night_cycle_enabled
-  daytime: !input daytime
+  day_time: !input daytime
   daytime_temperature: !input daytime_temperature
-  nighttime: !input nighttime
+  night_time: !input nighttime
   nighttime_temperature: !input nighttime_temperature
 
 
@@ -120,11 +120,13 @@ trigger:
     value_template: "{{ states.person|selectattr('state','equalto', ( geofence_zone | replace('zone.', '')) )|list|length }}"
     id: zone_occupants_change
   - platform: time
+    at: |
+      {{ day_time }}
     id: daytime
-    at: '{{ daytime }}'
   - platform: time
+    at: |
+      {{ night_time }}
     id: nighttime
-    at: '{{ nighttime }}'
 
 
 condition:
