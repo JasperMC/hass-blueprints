@@ -111,10 +111,12 @@ variables:
   night_time: !input nighttime
   nighttime_temperature: !input nighttime_temperature
 
+trigger_variables:
+  geofencezone: !input geofence_zone
 trigger:
   - platform: template
     value_template: |
-      {% set zone_name = ( geofence_zone | replace('zone.', '')) %}
+      {% set zone_name = ( geofencezone | replace('zone.', '')) %}
       {% set zone_occupants = states.person|selectattr('state','equalto', zone_name )|list|length %}
       {{ zone_occupants }}
     id: zone_occupants_change
